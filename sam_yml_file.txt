@@ -1,0 +1,36 @@
+---
+- name: Deploy website from Git repository to HTTP server
+  hosts: dev1
+  become: true
+  vars:
+    repo_url: "https://github.com/Sunil-1508/html_projects.git"
+    web_root: "/var/www/html"
+  tasks:
+    - name: Install Git on HTTP server
+      yum:
+        name: git
+        state: present
+
+    - name: Clone Git repository
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ web_root }}"
+        clone: true
+
+    - name: Set ownership of web root directory
+      file:
+        path: "{{ web_root }}"
+        owner: apache
+        group: apache
+        mode: '0755'
+
+    - name: Install Apache web server
+      yum:
+        name: httpd
+        state: present
+
+    - name: Start Apache service
+      service:
+        name: httpd
+        state: started
+        enabled: true
